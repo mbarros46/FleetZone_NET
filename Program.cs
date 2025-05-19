@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using MottuCrudAPI.Application.Mapping;
+using MottuCrudAPI.Application.Interfaces;
+using MottuCrudAPI.Application.Services;
 using MottuCrudAPI.Infrastructure.Data;
 using System.Reflection;
 
@@ -39,13 +40,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
 });
 
+// Register Services
+builder.Services.AddScoped<IMotoService, MotoService>();
+builder.Services.AddScoped<IPatioService, PatioService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mottu API V1");
+        c.RoutePrefix = string.Empty; // Serve the Swagger UI at the app's root
+    });
 }
 
 app.UseHttpsRedirection();
