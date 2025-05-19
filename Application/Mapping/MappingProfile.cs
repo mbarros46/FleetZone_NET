@@ -9,8 +9,7 @@ namespace MottuCrudAPI.Application.Mapping
         public MappingProfile()
         {
             // Moto mappings
-            CreateMap<Moto, MotoDTO>()
-                .ForMember(dest => dest.PatioNome, opt => opt.MapFrom(src => src.Patio != null ? src.Patio.Nome : null));
+            CreateMap<Moto, MotoDTO>();
             
             CreateMap<CreateMotoDTO, Moto>();
             CreateMap<UpdateMotoDTO, Moto>();

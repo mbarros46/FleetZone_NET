@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using MottuCrudAPI.Application.Interfaces;
 using MottuCrudAPI.Application.Services;
 using MottuCrudAPI.Infrastructure.Data;
+using MottuCrudAPI.Application.Mapping;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
