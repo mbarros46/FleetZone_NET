@@ -1,52 +1,72 @@
 using Microsoft.AspNetCore.Mvc;
-using MottuCrudAPI.Application.DTOs;
-using MottuCrudAPI.Application.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System.Net;
+using MottuCrudAPI.Persistense;
+using MottuCrudAPI.Infrastructure;
+using MottuCrudAPI.DTO.Response;
+using MottuCrudAPI.DTO.Request;
+
 
 namespace MottuCrudAPI.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [Tags("Pátios")]
+    [ApiController]
     public class PatioController : ControllerBase
     {
-        private readonly IPatioService _patioService;
+        private readonly ApplicationDbContext _context;
 
-        public PatioController(IPatioService patioService)
+        public PatioController(ApplicationDbContext context)
         {
-            _patioService = patioService;
+            _context = context;
         }
 
         /// <summary>
-        /// Obtém todos os pátios com filtros opcionais
+        /// Obtém todos os pátios, com filtros opcionais por nome e endereço
         /// </summary>
+        /// <param name="nome">Filtro opcional pelo nome do pátio</param>
+        /// <param name="endereco">Filtro opcional pelo endereço</param>
+        /// <returns>Lista de pátios</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<PatioDTO>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetAll([FromQuery] string? nome, [FromQuery] string? endereco)
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<PatioResponse>>> GetPatios([FromQuery] string? nome, [FromQuery] string? endereco)
         {
-            try
+            var query = _context.Patios.AsQueryable();
+
+            if (!string.IsNullOrEmpty(nome))
+                query = query.Where(p => p.Nome.Contains(nome));
+
+            if (!string.IsNullOrEmpty(endereco))
+                query = query.Where(p => p.Endereco.Contains(endereco));
+
+            var patios = await query.ToListAsync();
+
+            var response = patios.Select(p => new PatioResponse
             {
-                var patios = await _patioService.GetAllAsync(nome, endereco);
-                return Ok(patios);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                Id = p.Id,
+                Nome = p.Nome,
+                Endereco = p.Endereco,
+                Capacidade = p.Capacidade,
+                OcupacaoAtual = p.OcupacaoAtual
+            });
+
+            return Ok(response);
         }
 
+
         /// <summary>
-        /// Obtém um pátio específico pelo ID
+        /// Obtém um pátio pelo ID
         /// </summary>
+        /// <param name="id">ID do pátio</param>
+        /// <returns>Pátio encontrado ou NotFound</returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(PatioDTO), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(int id)
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<Patio>> GetPatio(Guid id)
         {
-            var patio = await _patioService.GetByIdAsync(id);
+            var patio = await _context.Patios.FindAsync(id);
             if (patio == null)
-                return NotFound(new { message = "Pátio não encontrado" });
+                return NotFound();
 
             return Ok(patio);
         }
@@ -54,58 +74,96 @@ namespace MottuCrudAPI.Controllers
         /// <summary>
         /// Cria um novo pátio
         /// </summary>
+        /// <param name="patio">Dados do pátio</param>
+        /// <returns>Pátio criado</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(PatioDTO), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Create([FromBody] PatioDTO patioDTO)
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<PatioResponse>> CreatePatio([FromBody] PatioRequest patioRequest)
         {
-            try
+            if (patioRequest == null)
+                return BadRequest();
+
+            var patio = Patio.Create(patioRequest.Nome, patioRequest.Endereco, patioRequest.Capacidade);
+
+            _context.Patios.Add(patio);
+            await _context.SaveChangesAsync();
+
+            var patioResponse = new PatioResponse
             {
-                var createdPatio = await _patioService.CreateAsync(patioDTO);
-                return CreatedAtAction(nameof(GetById), new { id = createdPatio.Id }, createdPatio);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                Id = patio.Id,
+                Nome = patio.Nome,
+                Endereco = patio.Endereco,
+                Capacidade = patio.Capacidade
+            };
+
+            return CreatedAtAction(nameof(GetPatio), new { id = patio.Id }, patioResponse);
         }
+
 
         /// <summary>
         /// Atualiza um pátio existente
         /// </summary>
+        /// <param name="id">ID do pátio a atualizar</param>
+        /// <param name="patioRequest">Dados atualizados do pátio</param>
+        /// <returns>Pátio atualizado ou NotFound</returns>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(PatioDTO), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(int id, [FromBody] PatioDTO patioDTO)
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<Patio>> UpdatePatio(Guid id, [FromBody] PatioRequest patioRequest)
         {
+            var patioExistente = await _context.Patios.FindAsync(id);
+            if (patioExistente == null)
+                return NotFound();
+
             try
             {
-                var updatedPatio = await _patioService.UpdateAsync(id, patioDTO);
-                if (updatedPatio == null)
-                    return NotFound(new { message = "Pátio não encontrado" });
-
-                return Ok(updatedPatio);
+                patioExistente.AtualizarPatio(patioRequest.Nome, patioRequest.Endereco, patioRequest.Capacidade);
+                await _context.SaveChangesAsync();
+                return Ok(patioExistente);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
             }
         }
 
+
+
         /// <summary>
-        /// Remove um pátio
+        /// Remove um pátio pelo ID
         /// </summary>
+        /// <param name="id">ID do pátio</param>
+        /// <returns>NoContent ou mensagem de erro</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(int id)
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeletePatio(Guid id)
         {
-            var result = await _patioService.DeleteAsync(id);
-            if (!result)
-                return NotFound(new { message = "Pátio não encontrado" });
+            var patio = await _context.Patios.FindAsync(id);
+            if (patio == null)
+                return NotFound();
+
+            var existeMotoAssociada = await _context.Motos
+    .AnyAsync(m => m.PatioId == id);
+
+
+            if (existeMotoAssociada)
+            {
+                return BadRequest(new
+                {
+                    message = "Não é possível deletar o pátio: existem motos associadas a ele."
+                });
+            }
+
+            _context.Patios.Remove(patio);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
+
     }
-} 
+}

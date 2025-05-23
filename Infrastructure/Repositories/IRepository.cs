@@ -1,5 +1,6 @@
-﻿namespace c_.Infrastructure.Repositories
+﻿namespace MottuCrudAPI.Infrastructure.Repositories
 {
+    
     public interface IRepository<T> where T : class
     {
         Task<T> GetByIdAsync(Guid id);

@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MottuCrudAPI.Infrastructure.Data;
+using MottuCrudAPI.Infrastructure;
 using Oracle.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
-namespace MottuCrudAPI.Migrations
+namespace c.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250519033425_InitialCreate")]
+    [Migration("20250523150050_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,48 +20,50 @@ namespace MottuCrudAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("MottuCrudAPI.Domain.Entities.Moto", b =>
+            modelBuilder.Entity("MottuCrudAPI.Persistense.Moto", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("RAW(16)");
 
                     b.Property<int>("Ano")
                         .HasColumnType("NUMBER(10)");
 
                     b.Property<string>("Modelo")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
 
-                    b.Property<int?>("PatioId")
-                        .HasColumnType("NUMBER(10)");
+                    b.Property<Guid?>("PatioId")
+                        .HasColumnType("RAW(16)");
 
                     b.Property<string>("Placa")
                         .IsRequired()
                         .HasMaxLength(7)
-                        .HasColumnType("NVARCHAR2(7)");
+                        .HasColumnType("NCHAR(7)")
+                        .IsFixedLength();
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PatioId");
 
-                    b.ToTable("Motos");
+                    b.ToTable("MOTO", (string)null);
                 });
 
-            modelBuilder.Entity("MottuCrudAPI.Domain.Entities.Patio", b =>
+            modelBuilder.Entity("MottuCrudAPI.Persistense.Patio", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("RAW(16)");
 
                     b.Property<int>("Capacidade")
                         .HasColumnType("NUMBER(10)");
@@ -75,24 +77,21 @@ namespace MottuCrudAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("NVARCHAR2(100)");
 
+                    b.Property<int>("OcupacaoAtual")
+                        .HasColumnType("NUMBER(10)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Patios");
+                    b.ToTable("PATIO", (string)null);
                 });
 
-            modelBuilder.Entity("MottuCrudAPI.Domain.Entities.Moto", b =>
+            modelBuilder.Entity("MottuCrudAPI.Persistense.Moto", b =>
                 {
-                    b.HasOne("MottuCrudAPI.Domain.Entities.Patio", "Patio")
-                        .WithMany("Motos")
-                        .HasForeignKey("PatioId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("MottuCrudAPI.Persistense.Patio", "Patio")
+                        .WithMany()
+                        .HasForeignKey("PatioId");
 
                     b.Navigation("Patio");
-                });
-
-            modelBuilder.Entity("MottuCrudAPI.Domain.Entities.Patio", b =>
-                {
-                    b.Navigation("Motos");
                 });
 #pragma warning restore 612, 618
         }

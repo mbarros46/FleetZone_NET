@@ -1,35 +1,39 @@
-﻿using c_.Infrastructure.Persistence;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MottuCrudAPI.Persistense;
 
-namespace c_.Infrastructure.Mappings
+
+
+namespace MottuCrudAPI.Infrastructure.Mappings
 {
-    public class MotoMapping: IEntityTypeConfiguration<Moto>
+    public class MotoMapping : IEntityTypeConfiguration<Moto>
     {
         public void Configure(EntityTypeBuilder<Moto> builder)
         {
-            builder
-                .ToTable("Motos");
+            builder.ToTable("MOTO");
 
-            builder
-                .HasKey(m => m.Id);
+            builder.HasKey(m => m.Id);
 
-            builder
-                .Property(m => m.Modelo)
+            builder.Property(m => m.Placa)
+                .IsRequired()
+                .HasMaxLength(7) 
+                .IsFixedLength();
+
+            builder.Property(m => m.Ano)
+                .IsRequired();
+
+            builder.Property(m => m.Modelo)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder
-                .Property(m => m.Placa)
-                .IsRequired()
-                .HasMaxLength(50);
+            builder.Property(m => m.PatioId)
+                .IsRequired(false); 
+
             
-            
-            builder
-                .Property(m => m.Status)
-                .IsRequired()
-                .HasMaxLength(20);
+            builder.Property(m => m.Status)
+                .HasMaxLength(20)
+                .IsRequired(false);
         }
-    
     }
 }

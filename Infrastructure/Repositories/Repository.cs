@@ -1,4 +1,4 @@
-﻿namespace c_.Infrastructure.Repositories
+﻿namespace MottuCrudAPI.Infrastructure.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
