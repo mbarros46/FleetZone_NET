@@ -164,6 +164,8 @@ namespace MottuCrudAPI.Controllers
                     });
                 }
 
+                // removendo o pátio
+
                 _context.Patios.Remove(patio);
                 await _context.SaveChangesAsync();
 
