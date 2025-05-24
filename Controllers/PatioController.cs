@@ -149,7 +149,7 @@ namespace MottuCrudAPI.Controllers
 
             
             {
-                // Buscar motos associadas explicitamente
+                // Buscar motos associadas 
                 var motosAssociadas = await _context.Motos
                     .Where(m => m.PatioId != null)
                     .ToListAsync();
