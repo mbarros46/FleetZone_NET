@@ -140,29 +140,39 @@ namespace MottuCrudAPI.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeletePatio(Guid id)
         {
             var patio = await _context.Patios.FindAsync(id);
             if (patio == null)
                 return NotFound();
 
-            var existeMotoAssociada = await _context.Motos
-    .AnyAsync(m => m.PatioId == id);
-
-
-            if (existeMotoAssociada)
+            
             {
-                return BadRequest(new
+                // Buscar motos associadas explicitamente
+                var motosAssociadas = await _context.Motos
+                    .Where(m => m.PatioId != null)
+                    .ToListAsync();
+
+                bool existeMotoAssociada = motosAssociadas.Any(m => m.PatioId == id);
+
+                if (existeMotoAssociada)
                 {
-                    message = "Não é possível deletar o pátio: existem motos associadas a ele."
-                });
+                    return BadRequest(new
+                    {
+                        message = "Não é possível deletar o pátio: existem motos associadas a ele."
+                    });
+                }
+
+                _context.Patios.Remove(patio);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Patios.Remove(patio);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            
         }
+
+
 
 
     }
