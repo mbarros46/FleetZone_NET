@@ -3,9 +3,9 @@
     public class MotoResponse
     {
         public Guid Id { get; set; }
-        public string Modelo { get; set; }
-        public string Placa { get; set; }
-        public string Status { get; set; }
+        public string Modelo { get; set; } = default!;
+        public string Placa { get; set; } = default!;
+        public string Status { get; set; } = default!;
         public int Ano { get; set; }
         public Guid? PatioId { get; set; }
 
