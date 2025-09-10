@@ -12,7 +12,7 @@ namespace MottuCrudAPI.Persistense
 
         public int Capacidade { get; private set; }
 
-        public int OcupacaoAtual { get; private set; }
+        public int OcupacaoAtual { get; set; }
 
         private Patio(string nome, string endereco, int capacidade)
         {
