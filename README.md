@@ -1,43 +1,47 @@
-# Mottu API - Sistema de Gerenciamento de Motos e Pátios
+# FleetZone API – Sprint 2 (.NET)
 
-Este projeto é uma API RESTful desenvolvida para a Mottu, utilizando .NET 8 e Oracle Database, seguindo os princípios de Clean Architecture e Domain-Driven Design (DDD).
+## Integrantes
+- Pedro Merise (RM 556826)
+- Miguel Barros Ramos (RM 556652)
+- Thomas Rodrigues rm558042
 
-## 🚀 Tecnologias Utilizadas
 
-- .NET 8
-- ASP.NET Core Web API
-- Entity Framework Core
-- Oracle Database
-- AutoMapper
-- Swagger/OpenAPI
+## Domínio e Arquitetura
+- Entidades principais: **Pátio**, **Motocicleta**, **Movimentação**.
+- Justificativa: representam locais, ativos e eventos operacionais do cenário Mottu.
+- Arquitetura: Clean Architecture (Domain, Application, Infrastructure, WebApi).
 
-## 📋 Pré-requisitos
-
-- .NET 8 SDK
-- Oracle Database
-- Visual Studio 2022 ou VS Code
-
-## 🔧 Configuração
-
-1. Clone o repositório
-2. Configure a string de conexão no arquivo `appsettings.json`:
-```json
-{
-  "ConnectionStrings": {
-    "Oracle": "Data Source=seu_servidor:1521/seu_sid;User ID=seu_usuario;Password=sua_senha;"
-  }
-}
+## Como executar
+```bash
+dotnet restore
+dotnet ef database update        # se usar EF + migrations
+dotnet run --project .
 ```
 
-3. Execute as migrações do banco de dados:
+A API sobe em: http://localhost:5000
+
+Swagger: http://localhost:5000/swagger
+
+### Exemplos de uso (cURL)
+# Listar pátios (paginado)
+curl "http://localhost:5000/api/v1/patios?pageNumber=1&pageSize=10"
+
+# Criar pátio
+curl -X POST "http://localhost:5000/api/v1/patios" -H "Content-Type: application/json" -d '{
+  "nome": "Pátio Central",
+  "endereco": "Av. das Nações, 1000 - SP",
+  "capacidade": 120
+}'
+
+### Testes
 ```bash
-dotnet ef migrations add InitialCreate
-dotnet ef database update
+dotnet test
 ```
 
-4. Execute o projeto:
-```bash
-dotnet run
+### Observações
+- Paginação + HATEOAS presentes em todas as coleções.
+- Status codes REST aplicados corretamente (200/201/204/400/404).
+- Swagger com XML comments e exemplos de payload.
 ```
 
 ## 📚 Rotas da API
@@ -113,5 +117,3 @@ dotnet run
 
 
 
-- Miguel Barros Ramos rm556652
-- Pedro Valentim Merise rm556826
