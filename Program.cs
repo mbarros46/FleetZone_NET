@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace MottuCrudAPI
 {
-    public class Program
+    public partial class Program
     {
         public static void Main(string[] args)
         {
@@ -29,14 +29,12 @@ namespace MottuCrudAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Mottu API",
-                    Version = "v1",
-                    Description = "API para gerenciamento de motos e pátios da Mottu",
+                    Title = "FleetZone API",
+                    Version = "v1"
                 });
-
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
+                
+                // Evita colisão de nomes
+                c.CustomSchemaIds(t => t.FullName?.Replace('+', '.'));
             });
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -52,7 +50,10 @@ namespace MottuCrudAPI
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FleetZone API v1");
+                });
             }
 
             app.UseHttpsRedirection();
@@ -63,5 +64,11 @@ namespace MottuCrudAPI
 
             app.Run();
         }
+
     }
+}
+
+namespace MottuCrudAPI
+{
+    public partial class Program { }
 }
