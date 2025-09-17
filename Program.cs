@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MottuCrudAPI.Infrastructure;
 using System.Reflection;
+using Swashbuckle.AspNetCore.Filters;
+using MottuCrudAPI.DTO.Request;
+using MottuCrudAPI.WebApi.SwaggerExamples;
 
 namespace MottuCrudAPI
 {
@@ -33,9 +36,19 @@ namespace MottuCrudAPI
                     Version = "v1"
                 });
                 
+                // XML comments
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), includeControllerXmlComments: true);
+
+                // Examples
+                c.ExampleFilters();
+                
                 // Evita colisão de nomes
                 c.CustomSchemaIds(t => t.FullName?.Replace('+', '.'));
             });
+
+            // registra exemplos que você criou
+            builder.Services.AddSwaggerExamplesFromAssemblyOf<PatioRequestExample>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
