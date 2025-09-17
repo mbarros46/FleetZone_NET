@@ -1,11 +1,15 @@
 using Swashbuckle.AspNetCore.Filters;
+using MottuCrudAPI.DTO.Request;
 
-public class PatioRequestExample : IExamplesProvider<PatioRequest>
+namespace MottuCrudAPI.WebApi.SwaggerExamples
 {
-    public PatioRequest GetExamples() => new PatioRequest
+    public class PatioRequestExample : IExamplesProvider<PatioRequest>
     {
-        Nome = "Pátio Central",
-        Endereco = "Av. das Nações, 1000 - SP",
-        Capacidade = 120
-    };
+        public PatioRequest GetExamples() => new PatioRequest
+        {
+            Nome = "Pátio Central",
+            Endereco = "Av. das Nações, 1000 - SP",
+            Capacidade = 120
+        };
+    }
 }

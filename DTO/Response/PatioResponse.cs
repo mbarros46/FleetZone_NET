@@ -7,5 +7,6 @@
         public string Endereco { get; set; } = default!;
         public int Capacidade { get; set; }
         public int OcupacaoAtual { get; set; }
+        public IEnumerable<LinkDto> Links { get; set; } = Enumerable.Empty<LinkDto>();
     }
 }
