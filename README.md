@@ -1,119 +1,145 @@
-# FleetZone API – Sprint 2 (.NET)
+# 🛵 FleetZone API – Advanced Business Development with .NET
 
-## Integrantes
-- Pedro Merise (RM 556826)
-- Miguel Barros Ramos (RM 556652)
-- Thomas Rodrigues rm558042
+API RESTful desenvolvida em **.NET 8 (Web API)** como parte do **Challenge 2025** (FIAP – 2º Ano ADS).  
+Projeto alinhado com as boas práticas REST e com os requisitos da disciplina **Advanced Business Development with .NET**.
 
+---
 
-## Domínio e Arquitetura
-- Entidades principais: **Pátio**, **Motocicleta**, **Movimentação**.
-- Justificativa: representam locais, ativos e eventos operacionais do cenário Mottu.
-- Arquitetura: Clean Architecture (Domain, Application, Infrastructure, WebApi).
+## 👨‍💻 Integrantes
+- Pedro Valentim Merise – RM 556826
+- Miguel Barros Ramos – RM 556652
+- Thomas Rodrigues – RM 558042
 
-## Como executar
-```bash
-dotnet restore
-dotnet ef database update        # se usar EF + migrations
-dotnet run --project .
-```
+---
 
-A API sobe em: http://localhost:5000
+## 📚 Domínio e Arquitetura
 
-Swagger: http://localhost:5000/swagger
+- **Entidades principais (mínimo 3):**
+  - **Pátio** → representa os locais físicos onde as motos ficam.
+  - **Motocicleta** → ativo principal gerenciado.
+  - **Movimentação** → histórico de entrada, saída e realocação de motos.
 
-### Exemplos de uso (cURL)
-# Listar pátios (paginado)
-curl "http://localhost:5000/api/v1/patios?pageNumber=1&pageSize=10"
+**Justificativa do domínio:** Essas entidades traduzem diretamente o cenário da Mottu:  
+controlar a infraestrutura (pátios), gerenciar os ativos (motocicletas) e registrar os eventos operacionais (movimentações).
 
-# Criar pátio
-curl -X POST "http://localhost:5000/api/v1/patios" -H "Content-Type: application/json" -d '{
-  "nome": "Pátio Central",
-  "endereco": "Av. das Nações, 1000 - SP",
-  "capacidade": 120
-}'
-
-### Testes
-```bash
-dotnet test
-```
-
-### Observações
-- Paginação + HATEOAS presentes em todas as coleções.
-- Status codes REST aplicados corretamente (200/201/204/400/404).
-- Swagger com XML comments e exemplos de payload.
-```
-
-## 📚 Rotas da API
-
-### Motos
-
-- GET /api/moto - Lista todas as motos
-- GET /api/moto/{id} - Obtém uma moto específica
-- POST /api/moto - Cria uma nova moto
-- PUT /api/moto/{id} - Atualiza uma moto existente
-- DELETE /api/moto/{id} - Remove uma moto
-
-### Pátios
-
-- GET /api/patio - Lista todos os pátios
-- GET /api/patio/{id} - Obtém um pátio específico
-- POST /api/patio - Cria um novo pátio
-- PUT /api/patio/{id} - Atualiza um pátio existente
-- DELETE /api/patio/{id} - Remove um pátio
-
-## 📝 Documentação
-
-A documentação da API está disponível através do Swagger UI quando o projeto está em execução:
-- URL: https://localhost:5001/swagger
-
-
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.
-
-## Autores
-
-- Miguel Barros Ramos rm556652
-- Pedro Valentim Merise rm556826
-
-# 🛵 FleetZone .NET API
-
-API Restful desenvolvida com ASP.NET Core para gerenciamento de motos, como parte da disciplina **Advanced Business Development with .NET** da FIAP.
+**Arquitetura utilizada:** Clean Architecture  
+- **Domain** → entidades, contratos e regras de negócio.  
+- **Application** → DTOs, validações e casos de uso.  
+- **Infrastructure** → persistência com EF Core (Oracle/SQLite).  
+- **WebApi** → controllers REST, HATEOAS, versionamento, Swagger.
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
-
-- ASP.NET Core 8
-- Entity Framework Core (Oracle)
-- Oracle.EntityFrameworkCore
-- Swagger (Swashbuckle)
+- ASP.NET Core 8 (Web API)
+- Entity Framework Core (com suporte a Oracle)
 - EF Core Migrations
-- RESTful API
+- Swagger / OpenAPI (Swashbuckle.AspNetCore + Filters)
+- xUnit para testes automatizados
 
 ---
 
-## 📦 Como Executar
+## ⚙️ Como Executar
 
 ### Pré-requisitos
-
-- .NET 8 SDK
-- Oracle Database em funcionamento
-- Ferramentas EF Core CLI (`dotnet tool install --global dotnet-ef`)
+- .NET 8 SDK instalado
+- Banco Oracle ou SQLite configurado
+- EF Core CLI:
+  ```
+  dotnet tool install --global dotnet-ef
+  ```
 
 ### Passos
-
-```bash
+```
 # Restaurar pacotes
 dotnet restore
 
-# Aplicar migrations (se ainda não aplicou)
-dotnet ef database update
+# Aplicar migrations no banco configurado
+dotnet ef database update --project src/WebApi --startup-project src/WebApi
 
-# Rodar a aplicação
-dotnet run
+# Executar a aplicação
+dotnet run --project src/WebApi
+```
 
+A API sobe em:  
+➡️ `http://localhost:5000`  
+➡️ Swagger UI: `http://localhost:5000/swagger`
+
+---
+
+## 🌐 Endpoints Principais
+
+### Motocicletas
+- `GET /api/v1/motocicletas?pageNumber=1&pageSize=10`
+- `GET /api/v1/motocicletas/{id}`
+- `POST /api/v1/motocicletas`
+- `PUT /api/v1/motocicletas/{id}`
+- `DELETE /api/v1/motocicletas/{id}`
+
+### Pátios
+- `GET /api/v1/patio?pageNumber=1&pageSize=10&nome=&endereco=`
+- `GET /api/v1/patio/{id}`
+- `POST /api/v1/patio`
+- `PUT /api/v1/patio/{id}`
+- `DELETE /api/v1/patio/{id}`
+
+### Movimentações
+- `GET /api/v1/movimentacoes?pageNumber=1&pageSize=10`
+- `GET /api/v1/movimentacoes/{id}`
+- `POST /api/v1/movimentacoes`
+- `PUT /api/v1/movimentacoes/{id}`
+- `DELETE /api/v1/movimentacoes/{id}`
+
+---
+
+## 📌 Exemplos de Uso (cURL)
+
+### Criar um Pátio
+```
+curl -X POST "http://localhost:5000/api/v1/patio"   -H "Content-Type: application/json"   -d '{
+    "nome": "Pátio Central",
+    "endereco": "Av. das Nações, 1000 - SP",
+    "capacidade": 120
+  }'
+```
+
+### Listar Pátios (paginado e filtrado)
+```
+curl "http://localhost:5000/api/v1/patio?pageNumber=1&pageSize=10&nome=Central"
+```
+
+### Criar uma Motocicleta
+```
+curl -X POST "http://localhost:5000/api/v1/motocicletas"   -H "Content-Type: application/json"   -d '{
+    "placa": "ABC1D23",
+    "modelo": "CG 160",
+    "status": "Disponivel"
+  }'
+```
+
+---
+
+## 📖 Swagger / OpenAPI
+
+O Swagger está configurado com:
+- Descrição de endpoints e parâmetros (via **XML Comments**)
+- Exemplos de payloads (`SwaggerRequestExample`)
+- Modelos de dados (DTOs) visíveis na UI
+
+➡️ Acesse `http://localhost:5000/swagger` após rodar a aplicação.
+
+---
+
+## 🧪 Testes Automatizados
+
+Os testes estão implementados com **xUnit** e cobrem:
+- Regras de negócio das entidades
+- Validações básicas
+- Testes de integração com `WebApplicationFactory`
+
+Rodar os testes:
+```
+dotnet test
+```
 
 
