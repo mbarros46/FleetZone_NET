@@ -2,7 +2,7 @@ public record LinkDto(string Rel, string Href, string Method);
 
 public static class HateoasBuilder
 {
-    public static IEnumerable<LinkDto> ForPatio(int id, Microsoft.AspNetCore.Mvc.IUrlHelper url)
+    public static IEnumerable<LinkDto> ForPatio(Guid id, Microsoft.AspNetCore.Mvc.IUrlHelper url)
     {
         return new[]
         {
