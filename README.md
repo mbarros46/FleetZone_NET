@@ -132,7 +132,7 @@ O Swagger está configurado com:
 - Exemplos de payloads (`SwaggerRequestExample`)
 - Modelos de dados (DTOs) visíveis na UI
 
-➡️ Acesse `http://localhost:5000/swagger` após rodar a aplicação.
+➡️ Acesse `http://localhost:5049/swagger` após rodar a aplicação.
 
 ---
 
