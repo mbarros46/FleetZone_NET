@@ -28,6 +28,12 @@ controlar a infraestrutura (pátios), gerenciar os ativos (motocicletas) e regis
 - **Infrastructure** → persistência com EF Core (Oracle/SQLite).  
 - **WebApi** → controllers REST, HATEOAS, versionamento, Swagger.
 
+**Justificativa da arquitetura:** Optamos pela Clean Architecture para garantir separação rigorosa de responsabilidades, facilitando a evolução do domínio sem acoplamento às camadas externas. O desenho usa limites bem definidos, o que permite:
+- **Testabilidade** — os casos de uso podem ser validados em isolamento, sem precisar subir banco ou web server.
+- **Manutenibilidade** — mudanças em infraestrutura (ex.: troca de banco Oracle ↔ SQLite) não impactam regras de negócio.
+- **Escalabilidade da equipe** — times distintos podem atuar em camadas diferentes, reduzindo conflitos e acelerando entregas.
+- **Extensibilidade** — a entrada de novos canais (ex.: gRPC, filas) exige apenas novas implementações de interface, preservando o core.
+
 ---
 
 ## 🚀 Tecnologias Utilizadas
