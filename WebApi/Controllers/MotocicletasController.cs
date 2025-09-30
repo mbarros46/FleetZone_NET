@@ -1,5 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
+using MottuCrudAPI.WebApi.SwaggerExamples;
+using System.Collections.Generic;
 
+/// <summary>
+/// Expõe operações CRUD para motocicletas com suporte a paginação e HATEOAS.
+/// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
 public class MotocicletasController : ControllerBase
@@ -9,6 +15,12 @@ public class MotocicletasController : ControllerBase
 
     public MotocicletasController(IMotocicletaRepository repo) => _repo = repo;
 
+    /// <summary>
+    /// Obtém uma lista paginada de motocicletas com links HATEOAS.
+    /// </summary>
+    /// <param name="pageNumber">Número da página solicitada.</param>
+    /// <param name="pageSize">Quantidade de itens por página.</param>
+    /// <returns>Envelope paginado com as motocicletas.</returns>
     [HttpGet(Name = "GetMotocicletas")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -45,9 +57,15 @@ public class MotocicletasController : ControllerBase
         return Ok(new { paged.PageNumber, paged.PageSize, paged.TotalCount, paged.TotalPages, links = collectionLinks, items = paged.Items });
     }
 
+    /// <summary>
+    /// Recupera uma motocicleta específica pelo identificador.
+    /// </summary>
+    /// <param name="id">Identificador da motocicleta.</param>
+    /// <returns>Dados da motocicleta ou 404 caso não encontrada.</returns>
     [HttpGet("{id:int}", Name = "GetMotocicletaById")]
     [ProducesResponseType(typeof(MotocicletaResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(MotocicletaResponseExample))]
     public async Task<IActionResult> GetById([FromRoute] int id)
     {
         var entity = await _repo.GetAsync(id);
@@ -70,11 +88,30 @@ public class MotocicletasController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Cria uma nova motocicleta.
+    /// </summary>
+    /// <param name="request">Payload de criação.</param>
+    /// <returns>Motocicleta criada.</returns>
     [HttpPost(Name = "CreateMotocicleta")]
+    [SwaggerRequestExample(typeof(MotocicletaRequest), typeof(MotocicletaRequestExample))]
+    [SwaggerResponseExample(StatusCodes.Status201Created, typeof(MotocicletaResponseExample))]
     [ProducesResponseType(typeof(MotocicletaResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] MotocicletaRequest request)
     {
+        if (request is null)
+        {
+            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                ["body"] = new[] { "O corpo da requisição não pode ser nulo." }
+            })
+            {
+                Title = "Requisição inválida",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
         var entity = new Motocicleta { Placa = request.Placa, Modelo = request.Modelo, PatioId = request.PatioId };
@@ -98,11 +135,33 @@ public class MotocicletasController : ControllerBase
         return CreatedAtRoute("GetMotocicletaById", new { id = entity.Id }, dto);
     }
 
+    /// <summary>
+    /// Atualiza por completo uma motocicleta existente.
+    /// </summary>
+    /// <param name="id">Identificador da motocicleta a atualizar.</param>
+    /// <param name="request">Dados atualizados.</param>
+    /// <returns>204 em caso de sucesso.</returns>
     [HttpPut("{id:int}", Name = "UpdateMotocicleta")]
+    [SwaggerRequestExample(typeof(MotocicletaRequest), typeof(MotocicletaRequestExample))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] MotocicletaRequest request)
     {
+        if (request is null)
+        {
+            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                ["body"] = new[] { "O corpo da requisição não pode ser nulo." }
+            })
+            {
+                Title = "Requisição inválida",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
         var entity = await _repo.GetAsync(id);
         if (entity is null) return NotFound();
 
@@ -114,6 +173,11 @@ public class MotocicletasController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Remove definitivamente uma motocicleta.
+    /// </summary>
+    /// <param name="id">Identificador da motocicleta.</param>
+    /// <returns>204 em caso de sucesso.</returns>
     [HttpDelete("{id:int}", Name = "DeleteMotocicleta")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,15 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using MottuCrudAPI.Persistense;
 using MottuCrudAPI.Infrastructure;
 using MottuCrudAPI.DTO.Response;
 using MottuCrudAPI.DTO.Request;
 using Swashbuckle.AspNetCore.Filters;
 using MottuCrudAPI.WebApi.SwaggerExamples;
+using System.Collections.Generic;
 
 namespace MottuCrudAPI.Controllers
 {
+	/// <summary>
+	/// Controlador responsável pelo gerenciamento de pátios e suas operações.
+	/// </summary>
 	[Route("api/v1/[controller]")]
 	[Tags("Pátios")]
 	[ApiController]
@@ -94,6 +97,7 @@ namespace MottuCrudAPI.Controllers
 		[HttpGet("{id}", Name = "GetPatioById")]
 		[ProducesResponseType(typeof(PatioResponse), StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
+	    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(PatioResponseExample))]
 		public async Task<IActionResult> GetById(Guid id)
 		{
 			var patio = await _context.Patios.FindAsync(id);
@@ -114,18 +118,33 @@ namespace MottuCrudAPI.Controllers
 		}
 
 		/// <summary>
-		/// Cria um novo pátio
+		/// Cria um novo pátio.
 		/// </summary>
 		/// <param name="patioRequest">Dados do pátio</param>
 		/// <returns>Pátio criado</returns>
 		[HttpPost(Name = "CreatePatio")]
 		[SwaggerRequestExample(typeof(PatioRequest), typeof(PatioRequestExample))]
+		[SwaggerResponseExample(StatusCodes.Status201Created, typeof(PatioResponseExample))]
 		[ProducesResponseType(typeof(PatioResponse), StatusCodes.Status201Created)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> Post([FromBody] PatioRequest patioRequest)
 		{
-			if (patioRequest == null)
-				return BadRequest();
+			if (patioRequest is null)
+			{
+				return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+				{
+					["body"] = new[] { "O corpo da requisição não pode ser nulo." }
+				})
+				{
+					Title = "Requisição inválida",
+					Status = StatusCodes.Status400BadRequest
+				});
+			}
+
+			if (!ModelState.IsValid)
+			{
+				return ValidationProblem(ModelState);
+			}
 
 			var patio = Patio.Create(patioRequest.Nome, patioRequest.Endereco, patioRequest.Capacidade);
 
@@ -145,18 +164,35 @@ namespace MottuCrudAPI.Controllers
 		}
 
 		/// <summary>
-		/// Atualiza um pátio existente
+		/// Atualiza um pátio existente.
 		/// </summary>
 		/// <param name="id">ID do pátio a atualizar</param>
 		/// <param name="patioRequest">Dados atualizados do pátio</param>
-		/// <returns>Pátio atualizado ou NotFound</returns>
+		/// <returns>204 quando atualizado com sucesso.</returns>
 		[HttpPut("{id}", Name = "UpdatePatio")]
 		[SwaggerRequestExample(typeof(PatioRequest), typeof(PatioRequestExample))]
-		[ProducesResponseType(typeof(PatioResponse), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> Put(Guid id, [FromBody] PatioRequest patioRequest)
 		{
+			if (patioRequest is null)
+			{
+				return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+				{
+					["body"] = new[] { "O corpo da requisição não pode ser nulo." }
+				})
+				{
+					Title = "Requisição inválida",
+					Status = StatusCodes.Status400BadRequest
+				});
+			}
+
+			if (!ModelState.IsValid)
+			{
+				return ValidationProblem(ModelState);
+			}
+
 			var patioExistente = await _context.Patios.FindAsync(id);
 			if (patioExistente == null)
 				return NotFound();
@@ -165,35 +201,31 @@ namespace MottuCrudAPI.Controllers
 			{
 				patioExistente.AtualizarPatio(patioRequest.Nome, patioRequest.Endereco, patioRequest.Capacidade);
 				await _context.SaveChangesAsync();
-                
-				var response = new PatioResponse
-				{
-					Id = patioExistente.Id,
-					Nome = patioExistente.Nome,
-					Endereco = patioExistente.Endereco,
-					Capacidade = patioExistente.Capacidade,
-					OcupacaoAtual = patioExistente.OcupacaoAtual,
-					Links = HateoasBuilder.ForPatio(patioExistente.Id, Url)
-				};
-                
-				return Ok(response);
 			}
 			catch (Exception ex)
 			{
-				return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+				return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+				{
+					["Patio"] = new[] { ex.InnerException?.Message ?? ex.Message }
+				})
+				{
+					Title = "Falha ao atualizar pátio",
+					Status = StatusCodes.Status400BadRequest
+				});
 			}
+
+			return NoContent();
 		}
 
 		/// <summary>
-		/// Remove um pátio pelo ID
+		/// Remove um pátio pelo ID.
 		/// </summary>
 		/// <param name="id">ID do pátio</param>
-		/// <returns>NoContent ou mensagem de erro</returns>
+		/// <returns>204 em caso de remoção ou detalhes de erro.</returns>
 		[HttpDelete("{id}", Name = "DeletePatio")]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+		[ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> Delete(Guid id)
 		{
 			var patio = await _context.Patios.FindAsync(id);
@@ -209,9 +241,13 @@ namespace MottuCrudAPI.Controllers
 
 			if (existeMotoAssociada)
 			{
-				return BadRequest(new
+				return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
 				{
-					message = "Não é possível deletar o pátio: existem motos associadas a ele."
+					["PatioId"] = new[] { "Não é possível deletar o pátio: existem motos associadas a ele." }
+				})
+				{
+					Title = "Regra de negócio violada",
+					Status = StatusCodes.Status400BadRequest
 				});
 			}
 

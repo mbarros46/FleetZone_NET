@@ -1,5 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using MottuCrudAPI.WebApi.SwaggerExamples;
+using Swashbuckle.AspNetCore.Filters;
+using System.Collections.Generic;
 
+/// <summary>
+/// Controlador responsável pelo fluxo de movimentações de motocicletas.
+/// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
 public class MovimentacoesController : ControllerBase
@@ -9,6 +15,12 @@ public class MovimentacoesController : ControllerBase
 
     public MovimentacoesController(IMovimentacaoRepository repo) => _repo = repo;
 
+    /// <summary>
+    /// Lista movimentações com suporte a paginação e links HATEOAS.
+    /// </summary>
+    /// <param name="pageNumber">Número da página.</param>
+    /// <param name="pageSize">Itens por página.</param>
+    /// <returns>Envelope paginado de movimentações.</returns>
     [HttpGet(Name = "GetMovimentacoes")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -46,9 +58,15 @@ public class MovimentacoesController : ControllerBase
         return Ok(new { paged.PageNumber, paged.PageSize, paged.TotalCount, paged.TotalPages, links = collectionLinks, items = paged.Items });
     }
 
+    /// <summary>
+    /// Recupera uma movimentação específica.
+    /// </summary>
+    /// <param name="id">Identificador da movimentação.</param>
+    /// <returns>Movimentação encontrada ou 404.</returns>
     [HttpGet("{id:int}", Name = "GetMovimentacaoById")]
     [ProducesResponseType(typeof(MovimentacaoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(MovimentacaoResponseExample))]
     public async Task<IActionResult> GetById([FromRoute] int id)
     {
         var entity = await _repo.GetAsync(id);
@@ -72,11 +90,30 @@ public class MovimentacoesController : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Registra uma nova movimentação.
+    /// </summary>
+    /// <param name="request">Dados da movimentação.</param>
+    /// <returns>Movimentação criada.</returns>
     [HttpPost(Name = "CreateMovimentacao")]
+    [SwaggerRequestExample(typeof(MovimentacaoRequest), typeof(MovimentacaoRequestExample))]
+    [SwaggerResponseExample(StatusCodes.Status201Created, typeof(MovimentacaoResponseExample))]
     [ProducesResponseType(typeof(MovimentacaoResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] MovimentacaoRequest request)
     {
+        if (request is null)
+        {
+            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                ["body"] = new[] { "O corpo da requisição não pode ser nulo." }
+            })
+            {
+                Title = "Requisição inválida",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
         var entity = new Movimentacao
@@ -107,11 +144,33 @@ public class MovimentacoesController : ControllerBase
         return CreatedAtRoute("GetMovimentacaoById", new { id = entity.Id }, dto);
     }
 
+    /// <summary>
+    /// Atualiza os dados de uma movimentação existente.
+    /// </summary>
+    /// <param name="id">Identificador da movimentação.</param>
+    /// <param name="request">Conteúdo atualizado.</param>
+    /// <returns>204 em caso de sucesso.</returns>
     [HttpPut("{id:int}", Name = "UpdateMovimentacao")]
+    [SwaggerRequestExample(typeof(MovimentacaoRequest), typeof(MovimentacaoRequestExample))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] MovimentacaoRequest request)
     {
+        if (request is null)
+        {
+            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                ["body"] = new[] { "O corpo da requisição não pode ser nulo." }
+            })
+            {
+                Title = "Requisição inválida",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
         var entity = await _repo.GetAsync(id);
         if (entity is null) return NotFound();
 
@@ -124,6 +183,11 @@ public class MovimentacoesController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Remove uma movimentação existente.
+    /// </summary>
+    /// <param name="id">Identificador da movimentação.</param>
+    /// <returns>204 quando removida com sucesso.</returns>
     [HttpDelete("{id:int}", Name = "DeleteMovimentacao")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
