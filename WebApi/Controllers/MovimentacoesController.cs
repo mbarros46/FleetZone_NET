@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using MottuCrudAPI.WebApi.SwaggerExamples;
 using Swashbuckle.AspNetCore.Filters;
+using FleetZone_NET.WebApi.SwaggerExamples;
+using FleetZone_NET.Application.DTOs;
+using FleetZone_NET.Application.Common;
 using System.Collections.Generic;
 
 /// <summary>
 /// Controlador responsável pelo fluxo de movimentações de motocicletas.
 /// </summary>
 [ApiController]
-[Route("api/v1/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/v1/[controller]")]
 public class MovimentacoesController : ControllerBase
 {
     private readonly IMovimentacaoRepository _repo;

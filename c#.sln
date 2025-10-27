@@ -23,3 +23,26 @@ Global
 		SolutionGuid = {DC65FAF4-7E70-4276-A2CC-DC0D4E036705}
 	EndGlobalSection
 EndGlobal
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FleetZone_NET.Tests", "..\FleetZone_NET.Tests\FleetZone_NET.Tests.csproj", "{B7A5A2E0-3A0B-4F12-9D4E-1234567890AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7A5A2E0-3A0B-4F12-9D4E-1234567890AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7A5A2E0-3A0B-4F12-9D4E-1234567890AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7A5A2E0-3A0B-4F12-9D4E-1234567890AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7A5A2E0-3A0B-4F12-9D4E-1234567890AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {
+			DC65FAF4-7E70-4276-A2CC-DC0D4E036705
+		}
+	EndGlobalSection
+EndGlobal

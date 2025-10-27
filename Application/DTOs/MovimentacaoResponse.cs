@@ -1,8 +1,12 @@
-/// <summary>
-/// Representa os dados expostos pela API para uma movimentação de motocicleta.
-/// </summary>
-public class MovimentacaoResponse
+using FleetZone_NET.Application.Common;
+
+namespace FleetZone_NET.Application.DTOs
 {
+    /// <summary>
+    /// Representa os dados expostos pela API para uma movimentação de motocicleta.
+    /// </summary>
+    public class MovimentacaoResponse
+    {
     /// <summary>
     /// Identificador exclusivo da movimentação.
     /// </summary>
@@ -31,10 +35,11 @@ public class MovimentacaoResponse
     /// <summary>
     /// Identificador do pátio relacionado ao evento.
     /// </summary>
-    public int PatioId { get; set; }
+    public Guid PatioId { get; set; }
 
     /// <summary>
     /// Links HATEOAS que descrevem ações relacionadas.
     /// </summary>
     public IEnumerable<LinkDto> Links { get; set; } = Enumerable.Empty<LinkDto>();
+    }
 }

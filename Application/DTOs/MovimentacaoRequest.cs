@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// Representa a carga necessária para registrar uma movimentação de motocicleta.
-/// </summary>
-public class MovimentacaoRequest
+namespace FleetZone_NET.Application.DTOs
 {
+    /// <summary>
+    /// Representa a carga necessária para registrar uma movimentação de motocicleta.
+    /// </summary>
+    public class MovimentacaoRequest
+    {
     /// <summary>
     /// Tipo da movimentação (por exemplo, Entrada, Saída, Transferência).
     /// </summary>
@@ -27,6 +29,6 @@ public class MovimentacaoRequest
     /// <summary>
     /// Identificador do pátio de origem/destino.
     /// </summary>
-    [Range(1, int.MaxValue)]
-    public int PatioId { get; set; }
+    public Guid PatioId { get; set; }
+    }
 }

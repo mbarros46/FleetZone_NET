@@ -6,6 +6,6 @@ public class Movimentacao
     public string? Observacao { get; set; }
     public int MotocicletaId { get; set; }
     public Motocicleta Motocicleta { get; set; } = default!;
-    public int PatioId { get; set; }
+    public Guid PatioId { get; set; }
     public Patio Patio { get; set; } = default!;
 }

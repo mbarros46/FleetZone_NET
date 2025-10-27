@@ -1,4 +1,6 @@
-﻿namespace MottuCrudAPI.DTO.Response
+﻿using FleetZone_NET.Application.Common;
+
+namespace FleetZone_NET.DTO.Response
 {
     /// <summary>
     /// Representa os dados públicos de um pátio expostos pela API.

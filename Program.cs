@@ -1,87 +1,56 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using MottuCrudAPI.Infrastructure;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
+using FleetZone_NET.ML;
+using FleetZone_NET.Security;
 using Swashbuckle.AspNetCore.Filters;
-using MottuCrudAPI.DTO.Request;
-using MottuCrudAPI.WebApi.SwaggerExamples;
 
-namespace MottuCrudAPI
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+
+builder.Services.AddApiVersioning(o =>
 {
-    public partial class Program
+    o.AssumeDefaultVersionWhenUnspecified = true;
+    o.DefaultApiVersion = new ApiVersion(1, 0);
+    o.ReportApiVersions = true;
+});
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "FleetZone API", Version = "v1", Description = "Sprint 4 (.NET)" });
+
+    var securityScheme = new OpenApiSecurityScheme
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        Name = "X-API-KEY",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyScheme" }
+    };
+    c.AddSecurityDefinition("ApiKeyScheme", securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement { { securityScheme, new List<string>() } });
 
-            builder.Services.AddControllers();
+    c.ExampleFilters();
+});
+builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetExecutingAssembly());
 
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowLocalhost",
-                    policy =>
-                    {
-                        policy.WithOrigins("http://localhost:5049", "https://localhost:7208")
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                    });
-            });
+builder.Services.AddHealthChecks();
 
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "FleetZone API",
-                    Version = "v1"
-                });
-                
-                // XML comments
-                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), includeControllerXmlComments: true);
+builder.Services.AddSingleton<RiskPredictor>();
 
-                // Examples
-                c.ExampleFilters();
-                
-                // Evita colisão de nomes
-                c.CustomSchemaIds(t => t.FullName?.Replace('+', '.'));
-            });
+var app = builder.Build();
 
-            // registra exemplos que você criou
-            builder.Services.AddSwaggerExamplesFromAssemblyOf<PatioRequestExample>();
+app.UseSwagger();
+app.UseSwaggerUI();
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
-            });
+app.UseHttpsRedirection();
 
-            var app = builder.Build();
+app.UseMiddleware<ApiKeyMiddleware>();
 
-            // Deve estar antes do UseAuthorization e MapControllers
-            app.UseCors("AllowLocalhost");
+app.MapHealthChecks("/health");
+app.MapControllers();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FleetZone API v1");
-                });
-            }
+app.Run();
 
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-            app.MapControllers();
-
-            app.Run();
-        }
-
-    }
-}
-
-namespace MottuCrudAPI
-{
-    public partial class Program { }
-}
+public partial class Program { }

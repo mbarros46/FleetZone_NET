@@ -1,14 +1,17 @@
-public record LinkDto(string Rel, string Href, string Method);
-
-public static class HateoasBuilder
+namespace FleetZone_NET.Application.Common
 {
-    public static IEnumerable<LinkDto> ForPatio(Guid id, Microsoft.AspNetCore.Mvc.IUrlHelper url)
+    public record LinkDto(string Rel, string Href, string Method);
+
+    public static class HateoasBuilder
     {
-        return new[]
+        public static IEnumerable<LinkDto> ForPatio(Guid id, Microsoft.AspNetCore.Mvc.IUrlHelper url)
         {
-            new LinkDto("self",  url.Link("GetPatioById", new { id })!, "GET"),
-            new LinkDto("update",url.Link("UpdatePatio",  new { id })!, "PUT"),
-            new LinkDto("delete",url.Link("DeletePatio",  new { id })!, "DELETE")
-        };
+            return new[]
+            {
+                new LinkDto("self",  url.Link("GetPatioById", new { id })!, "GET"),
+                new LinkDto("update",url.Link("UpdatePatio",  new { id })!, "PUT"),
+                new LinkDto("delete",url.Link("DeletePatio",  new { id })!, "DELETE")
+            };
+        }
     }
 }

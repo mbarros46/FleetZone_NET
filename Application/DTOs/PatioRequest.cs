@@ -1,6 +1,9 @@
-public class PatioRequest
+namespace FleetZone_NET.Application.DTOs
 {
-    public string Nome { get; set; } = default!;
-    public string Endereco { get; set; } = default!;
-    public int Capacidade { get; set; }
+    public class PatioRequest
+    {
+        public string Nome { get; set; } = default!;
+        public string Endereco { get; set; } = default!;
+        public int Capacidade { get; set; }
+    }
 }

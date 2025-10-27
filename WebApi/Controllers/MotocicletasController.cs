@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
-using MottuCrudAPI.WebApi.SwaggerExamples;
+using FleetZone_NET.WebApi.SwaggerExamples;
+using FleetZone_NET.Application.DTOs;
+using FleetZone_NET.Application.Common;
 using System.Collections.Generic;
 
 /// <summary>
 /// Expõe operações CRUD para motocicletas com suporte a paginação e HATEOAS.
 /// </summary>
 [ApiController]
-[Route("api/v1/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/v1/[controller]")]
 public class MotocicletasController : ControllerBase
 {
     private readonly IMotocicletaRepository _repo;

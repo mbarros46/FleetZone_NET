@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// Representa a carga útil necessária para criar ou atualizar uma motocicleta.
-/// </summary>
-public class MotocicletaRequest
+namespace FleetZone_NET.Application.DTOs
 {
+    /// <summary>
+    /// Representa a carga útil necessária para criar ou atualizar uma motocicleta.
+    /// </summary>
+    public class MotocicletaRequest
+    {
     /// <summary>
     /// Placa da motocicleta no padrão Mercosul.
     /// </summary>
@@ -22,6 +24,6 @@ public class MotocicletaRequest
     /// <summary>
     /// Identificador do pátio ao qual a motocicleta está associada.
     /// </summary>
-    [Range(1, int.MaxValue)]
-    public int PatioId { get; set; }
+    public Guid PatioId { get; set; }
+    }
 }

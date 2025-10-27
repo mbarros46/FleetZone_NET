@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext : DbContext
+namespace FleetZone_NET.Infrastructure
 {
+    public class AppDbContext : DbContext
+    {
     public AppDbContext(DbContextOptions<AppDbContext> opt) : base(opt) {}
 
     public DbSet<Patio> Patios => Set<Patio>();
@@ -33,4 +35,5 @@ public class AppDbContext : DbContext
             e.HasOne(x => x.Patio).WithMany().HasForeignKey(x => x.PatioId);
         });
     }
+}
 }

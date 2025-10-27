@@ -1,8 +1,12 @@
-/// <summary>
-/// Representa os dados expostos pela API para uma motocicleta, incluindo links HATEOAS.
-/// </summary>
-public class MotocicletaResponse
+using FleetZone_NET.Application.Common;
+
+namespace FleetZone_NET.Application.DTOs
 {
+    /// <summary>
+    /// Representa os dados expostos pela API para uma motocicleta, incluindo links HATEOAS.
+    /// </summary>
+    public class MotocicletaResponse
+    {
     /// <summary>
     /// Identificador exclusivo da motocicleta.
     /// </summary>
@@ -26,10 +30,11 @@ public class MotocicletaResponse
     /// <summary>
     /// Identificador do pátio associado.
     /// </summary>
-    public int PatioId { get; set; }
+    public Guid PatioId { get; set; }
 
     /// <summary>
     /// Coleção de links HATEOAS relacionados à motocicleta.
     /// </summary>
     public IEnumerable<LinkDto> Links { get; set; } = Enumerable.Empty<LinkDto>();
+    }
 }

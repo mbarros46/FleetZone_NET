@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using FleetZone_NET.Infrastructure;
 
-public class PatioRepository : IPatioRepository
+namespace FleetZone_NET.Infrastructure.Repositories
 {
-    private readonly AppDbContext _ctx;
-    public PatioRepository(AppDbContext ctx) => _ctx = ctx;
+    public class PatioRepository : IPatioRepository
+    {
+        private readonly AppDbContext _ctx;
+        public PatioRepository(AppDbContext ctx) => _ctx = ctx;
 
     public async Task<Patio?> GetAsync(Guid id) =>
         await _ctx.Patios.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
@@ -33,5 +36,6 @@ public class PatioRepository : IPatioRepository
     {
         _ctx.Patios.Remove(entity);
         await _ctx.SaveChangesAsync();
+    }
     }
 }

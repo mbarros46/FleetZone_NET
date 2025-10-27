@@ -1,26 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MottuCrudAPI.Persistense;
-using MottuCrudAPI.Infrastructure;
-using MottuCrudAPI.DTO.Response;
-using MottuCrudAPI.DTO.Request;
+using FleetZone_NET.Infrastructure;
+using FleetZone_NET.DTO.Response;
+using FleetZone_NET.Application.DTOs;
 using Swashbuckle.AspNetCore.Filters;
-using MottuCrudAPI.WebApi.SwaggerExamples;
+using FleetZone_NET.WebApi.SwaggerExamples;
+using FleetZone_NET.Application.Common;
 using System.Collections.Generic;
 
-namespace MottuCrudAPI.Controllers
+namespace FleetZone_NET.WebApi.Controllers
 {
 	/// <summary>
 	/// Controlador responsável pelo gerenciamento de pátios e suas operações.
 	/// </summary>
-	[Route("api/v1/[controller]")]
+	[Route("api/v{version:apiVersion}/v1/[controller]")]
 	[Tags("Pátios")]
 	[ApiController]
+    [ApiVersion("1.0")]
 	public class PatioController : ControllerBase
 	{
-		private readonly ApplicationDbContext _context;
+		private readonly AppDbContext _context;
 
-		public PatioController(ApplicationDbContext context)
+		public PatioController(AppDbContext context)
 		{
 			_context = context;
 		}
@@ -233,11 +234,11 @@ namespace MottuCrudAPI.Controllers
 				return NotFound();
 
 			// Buscar motos associadas 
-			var motosAssociadas = await _context.Motos
-				.Where(m => m.PatioId != null)
+			var motosAssociadas = await _context.Motocicletas
+				.Where(m => m.PatioId == id)
 				.ToListAsync();
 
-			bool existeMotoAssociada = motosAssociadas.Any(m => m.PatioId == id);
+			bool existeMotoAssociada = motosAssociadas.Any();
 
 			if (existeMotoAssociada)
 			{

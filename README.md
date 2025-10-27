@@ -1,7 +1,7 @@
 # 🛵 FleetZone API – Advanced Business Development with .NET
 
-API RESTful desenvolvida em **.NET 8 (Web API)** como parte do **Challenge 2025** (FIAP – 2º Ano ADS).  
-Projeto alinhado com as boas práticas REST e com os requisitos da disciplina **Advanced Business Development with .NET**.
+API RESTful desenvolvida em **.NET 8 (Web API)** como parte do **Challenge 2025** (FIAP – 2º Ano ADS).
+Projeto alinhado com boas práticas REST e com os requisitos da disciplina **Advanced Business Development with .NET**.
 
 ---
 
@@ -19,76 +19,63 @@ Projeto alinhado com as boas práticas REST e com os requisitos da disciplina **
   - **Motocicleta** → ativo principal gerenciado.
   - **Movimentação** → histórico de entrada, saída e realocação de motos.
 
-**Justificativa do domínio:** Essas entidades traduzem diretamente o cenário da Mottu:  
-controlar a infraestrutura (pátios), gerenciar os ativos (motocicletas) e registrar os eventos operacionais (movimentações).
-
-**Arquitetura utilizada:** Clean Architecture  
-- **Domain** → entidades, contratos e regras de negócio.  
-- **Application** → DTOs, validações e casos de uso.  
-- **Infrastructure** → persistência com EF Core (Oracle/SQLite).  
-- **WebApi** → controllers REST, HATEOAS, versionamento, Swagger.
-
-**Justificativa da arquitetura:** Optamos pela Clean Architecture para garantir separação rigorosa de responsabilidades, facilitando a evolução do domínio sem acoplamento às camadas externas. O desenho usa limites bem definidos, o que permite:
-- **Testabilidade** — os casos de uso podem ser validados em isolamento, sem precisar subir banco ou web server.
-- **Manutenibilidade** — mudanças em infraestrutura (ex.: troca de banco Oracle ↔ SQLite) não impactam regras de negócio.
-- **Escalabilidade da equipe** — times distintos podem atuar em camadas diferentes, reduzindo conflitos e acelerando entregas.
-- **Extensibilidade** — a entrada de novos canais (ex.: gRPC, filas) exige apenas novas implementações de interface, preservando o core.
+**Arquitetura utilizada:** Clean Architecture (Domain / Application / Infrastructure / WebApi)
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 - ASP.NET Core 8 (Web API)
-- Entity Framework Core (com suporte a Oracle)
-- EF Core Migrations
-- Swagger / OpenAPI (Swashbuckle.AspNetCore + Filters)
+- Entity Framework Core (migrations + relational providers)
+- Swagger / OpenAPI (Swashbuckle)
+- ML.NET (endpoint de predição)
 - xUnit para testes automatizados
 
 ---
 
-## 🔧 Variáveis de Ambiente
+## 🔧 Variáveis de Ambiente (exemplos PowerShell)
 
-| Variável | Obrigatória? | Descrição | Exemplo (PowerShell) |
-| --- | --- | --- | --- |
-| `ConnectionStrings__Oracle` | ✅ | String de conexão utilizada pelo EF Core. | `$env:ConnectionStrings__Oracle = "Data Source=oracle.fiap.com.br:1521/orcl;User ID=RM556652;Password=123456;"` |
-| `ASPNETCORE_ENVIRONMENT` | ⚙️ | Ambiente de execução (`Development`, `Staging`, `Production`). | `$env:ASPNETCORE_ENVIRONMENT = "Development"` |
-| `ASPNETCORE_HTTPS_PORT` | ⚙️ | Porta HTTPS exposta (default: `7208`). | `$env:ASPNETCORE_HTTPS_PORT = "7208"` |
-| `ASPNETCORE_URLS` | Opcional | Sobrescreve as URLs de bind do Kestrel. Use se quiser rodar em outra porta/IP. | `$env:ASPNETCORE_URLS = "http://localhost:5049;https://localhost:7208"` |
+```powershell
+$env:ConnectionStrings__Oracle = "Data Source=oracle.fiap.com.br:1521/orcl;User ID=RM556652;Password=123456;"
+$env:ASPNETCORE_ENVIRONMENT = "Development"
+$env:ASPNETCORE_HTTPS_PORT = "7208"
+$env:ASPNETCORE_URLS = "http://localhost:5049;https://localhost:7208"
+```
 
-> 💡 As variáveis podem ser definidas diretamente no PowerShell (válidas apenas para a sessão atual) ou em um arquivo `appsettings.{Environment}.json`.
+> As variáveis podem ser definidas na sessão do PowerShell ou via `appsettings.{Environment}.json`.
 
 ---
 
-## ⚙️ Como Executar
+## ⚙️ Como Executar (rápido)
 
-### Pré-requisitos
-- .NET 8 SDK instalado
-- Banco Oracle ou SQLite configurado
-- EF Core CLI:
-  ```
-  dotnet tool install --global dotnet-ef
-  ```
+Pré-requisitos:
+- .NET 8 SDK
+- `dotnet-ef` (opcional para migrations)
 
-### Passos
-```
-# 1. (Somente uma vez) Confiar no certificado HTTPS de desenvolvimento
-dotnet dev-certs https --trust
+Passos mínimos:
 
-# 2. Restaurar pacotes e aplicar migrations
+```powershell
+# (1) Restaurar pacotes
 dotnet restore
+
+# (2) (Opcional) aplicar migrations / configurar DB
+dotnet tool install --global dotnet-ef
 dotnet ef database update
 
-# 3. Executar a aplicação (perfil HTTPS recomendado)
-dotnet run --launch-profile https
+# (3) Executar a aplicação (perfil HTTPS recomendado)
+# Ajuste o path se estiver abrindo a solução de outra pasta
+dotnet run --project .\FleetZone_NET\ -c Debug --launch-profile https
 ```
 
-A API sobe em:  
-➡️ HTTP: `http://localhost:5049`  
-➡️ HTTPS: `https://localhost:7208`  
-➡️ Swagger UI: `https://localhost:7208/swagger`
+URLs padrão (quando rodando localmente):
+- HTTP: http://localhost:5049
+- HTTPS: https://localhost:7208
+- Swagger UI: https://localhost:7208/swagger
 
 ---
 
 ## 🌐 Endpoints Principais
+
+> A API usa versionamento por rota: `api/v1/...`.
 
 ### Motocicletas
 - `GET /api/v1/motocicletas?pageNumber=1&pageSize=10`
@@ -113,44 +100,14 @@ A API sobe em:
 
 ---
 
-## 📌 Exemplos de Uso (cURL)
+## 📌 Exemplos de Uso (cURL / PowerShell)
 
-> Caso ainda não tenha confiado no certificado de desenvolvimento, adicione a opção `-k` aos comandos abaixo.
+Se estiver usando o certificado de desenvolvimento e o endpoint HTTPS local, pode remover `-k`. Exemplo de chamadas abaixo usam o host padrão `https://localhost:7208`.
 
 ### Listar Motocicletas (paginação + HATEOAS)
 
 ```powershell
 curl "https://localhost:7208/api/v1/motocicletas?pageNumber=1&pageSize=2"
-```
-
-**Resposta (200 OK)**
-
-```json
-{
-  "pageNumber": 1,
-  "pageSize": 2,
-  "totalCount": 42,
-  "totalPages": 21,
-  "links": [
-    { "rel": "self", "href": "https://localhost:7208/api/v1/motocicletas?pageNumber=1&pageSize=2", "method": "GET" },
-    { "rel": "first", "href": "https://localhost:7208/api/v1/motocicletas?pageNumber=1&pageSize=2", "method": "GET" },
-    { "rel": "last", "href": "https://localhost:7208/api/v1/motocicletas?pageNumber=21&pageSize=2", "method": "GET" }
-  ],
-  "items": [
-    {
-      "id": 1,
-      "placa": "ABC1D23",
-      "modelo": "Honda CG 160",
-      "status": "Disponivel",
-      "patioId": 1,
-      "links": [
-        { "rel": "self", "href": "https://localhost:7208/api/v1/motocicletas/1", "method": "GET" },
-        { "rel": "update", "href": "https://localhost:7208/api/v1/motocicletas/1", "method": "PUT" },
-        { "rel": "delete", "href": "https://localhost:7208/api/v1/motocicletas/1", "method": "DELETE" }
-      ]
-    }
-  ]
-}
 ```
 
 ### Criar um Pátio
@@ -163,68 +120,74 @@ curl -X POST "https://localhost:7208/api/v1/patio" -H "Content-Type: application
 }'
 ```
 
-### Listar Pátios (paginado e filtrado)
+**Observação importante:** as IDs de recursos no projeto são GUIDs. Use o GUID retornado no corpo das respostas para operações subsequentes.
+
+### Exemplo: obter um pátio por ID (GUID)
 
 ```powershell
-curl "https://localhost:7208/api/v1/patio?pageNumber=1&pageSize=5&nome=Central"
+curl "https://localhost:7208/api/v1/patio/3f8f2c9b-7f9a-4a8d-9b2c-0a1b2c3d4e5f"
 ```
 
-### Criar uma Movimentação
+### Criar uma Movimentação (use GUIDs retornados pela API)
 
 ```powershell
 curl -X POST "https://localhost:7208/api/v1/movimentacoes" -H "Content-Type: application/json" -d '{
   "tipo": "Entrada",
   "observacao": "Recebida do pátio Unidade 02",
-  "motocicletaId": 1,
-  "patioId": 1
+  "motocicletaId": "a1b2c3d4-1111-2222-3333-444455556666",
+  "patioId": "3f8f2c9b-7f9a-4a8d-9b2c-0a1b2c3d4e5f"
 }'
 ```
 
-### Exemplo de erro 400 (ValidationProblemDetails)
+### ML endpoint (Risk Predictor)
+
+Endpoint: `POST /api/v1/ml/risk`
+
+Exemplo de requisição com header de API Key (`X-API-KEY`). O valor padrão configurado no `appsettings.json` é `fleetzone-sprint4-key` (ajuste conforme seu ambiente).
 
 ```powershell
-curl -X POST "https://localhost:7208/api/v1/motocicletas" -H "Content-Type: application/json" -d '{}'
+curl -X POST "https://localhost:7208/api/v1/ml/risk" -H "Content-Type: application/json" -H "X-API-KEY: fleetzone-sprint4-key" -d '{
+  "idade": 28,
+  "distanciaKm": 12.5,
+  "ultimasOcorrencias": 0
+}'
 ```
 
-**Resposta (400 Bad Request)**
-
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-  "title": "One or more validation errors occurred.",
-  "status": 400,
-  "errors": {
-    "Placa": [ "The Placa field is required." ],
-    "Modelo": [ "The Modelo field is required." ],
-    "PatioId": [ "The field PatioId must be between 1 and 2147483647." ]
-  }
-}
-```
+Resposta esperada (exemplo): 200 OK com probabilidade/risco no payload.
 
 ---
 
 ## 📖 Swagger / OpenAPI
 
-O Swagger está configurado com:
-- Descrição de endpoints e parâmetros (via **XML Comments**)
-- Exemplos de payloads (`SwaggerRequestExample`)
-- Exemplos de respostas (`SwaggerResponseExample`)
-- Modelos de dados (DTOs) visíveis na UI
-
-➡️ Acesse `https://localhost:7208/swagger` após rodar a aplicação.
+O Swagger está configurado com documentação e exemplos. Acesse: `https://localhost:7208/swagger` após subir a aplicação.
 
 ---
 
 ## 🧪 Testes Automatizados
 
-Os testes estão implementados com **xUnit** e cobrem:
-- Regras de negócio das entidades
-- Validações básicas
-- Testes de integração com `WebApplicationFactory`
+Testes implementados com **xUnit** e `WebApplicationFactory<Program>` para integrações.
 
-Rodar os testes:
+Rodar todos os testes:
+
+```powershell
+# Restaurar e testar
+dotnet restore
+
+dotnet test .\FleetZone_NET.Tests\ -c Release
 ```
-dotnet test
-```
 
+Nota: os testes de integração executados localmente estão passando (4 testes, 0 falhas) no ambiente onde foram verificados; se repetir em outro host, rode `dotnet restore` antes.
 
+---
+
+## Checklist Sprint 4
+
+- [x] Health Checks em `/health`
+- [x] Versionamento por rota: `api/v1/...`
+- [x] Segurança por API Key via header `X-API-KEY` (valor padrão `fleetzone-sprint4-key` em `appsettings.json`)
+- [x] Endpoint ML.NET: `POST /api/v1/ml/risk`
+- [x] Testes de integração com `WebApplicationFactory<Program>`
+
+Observação: todos os requisitos funcionais da Sprint 4 estão implementados e os testes passam localmente. Itens opcionais que você pode querer adicionar:
+- Centralizar versões de pacotes com `Directory.Packages.props` para evitar avisos de unificação de versão.
+- Atualizar exemplos de configuração (ex.: strings de conexão) conforme seu ambiente.

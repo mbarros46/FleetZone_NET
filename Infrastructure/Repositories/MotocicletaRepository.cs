@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using FleetZone_NET.Infrastructure;
 
-public class MotocicletaRepository : IMotocicletaRepository
+namespace FleetZone_NET.Infrastructure.Repositories
 {
-    private readonly AppDbContext _ctx;
-    public MotocicletaRepository(AppDbContext ctx) => _ctx = ctx;
+    public class MotocicletaRepository : IMotocicletaRepository
+    {
+        private readonly AppDbContext _ctx;
+        public MotocicletaRepository(AppDbContext ctx) => _ctx = ctx;
 
     public async Task<Motocicleta?> GetAsync(int id) =>
         await _ctx.Motocicletas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
@@ -33,5 +36,6 @@ public class MotocicletaRepository : IMotocicletaRepository
     {
         _ctx.Motocicletas.Remove(entity);
         await _ctx.SaveChangesAsync();
+    }
     }
 }

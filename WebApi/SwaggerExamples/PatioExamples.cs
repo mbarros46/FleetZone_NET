@@ -1,8 +1,9 @@
 using Swashbuckle.AspNetCore.Filters;
-using MottuCrudAPI.DTO.Request;
-using MottuCrudAPI.DTO.Response;
+using FleetZone_NET.Application.DTOs;
+using FleetZone_NET.DTO.Response;
+using FleetZone_NET.Application.Common;
 
-namespace MottuCrudAPI.WebApi.SwaggerExamples
+namespace FleetZone_NET.WebApi.SwaggerExamples
 {
     public class PatioRequestExample : IExamplesProvider<PatioRequest>
     {
