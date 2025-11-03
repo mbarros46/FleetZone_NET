@@ -10,7 +10,7 @@ using System.Collections.Generic;
 /// </summary>
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/v1/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class MotocicletasController : ControllerBase
 {
     private readonly IMotocicletaRepository _repo;

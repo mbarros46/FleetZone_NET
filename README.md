@@ -145,15 +145,29 @@ Endpoint: `POST /api/v1/ml/risk`
 
 Exemplo de requisição com header de API Key (`X-API-KEY`). O valor padrão configurado no `appsettings.json` é `fleetzone-sprint4-key` (ajuste conforme seu ambiente).
 
+Payload esperado (exemplo):
+
+```json
+{
+  "RainMm": 50.0,
+  "DrainageScore": 0.6,
+  "Slope": 3.0,
+  "PastFloods": 1.0
+}
+```
+
+Exemplo de chamada (PowerShell / curl):
+
 ```powershell
 curl -X POST "https://localhost:7208/api/v1/ml/risk" -H "Content-Type: application/json" -H "X-API-KEY: fleetzone-sprint4-key" -d '{
-  "idade": 28,
-  "distanciaKm": 12.5,
-  "ultimasOcorrencias": 0
+  "RainMm": 50.0,
+  "DrainageScore": 0.6,
+  "Slope": 3.0,
+  "PastFloods": 1.0
 }'
 ```
 
-Resposta esperada (exemplo): 200 OK com probabilidade/risco no payload.
+Resposta esperada (exemplo): 200 OK com JSON contendo IsHighRisk, Probability, Score.
 
 ---
 
